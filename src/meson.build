@@ -1,4 +1,6 @@
 sources = [
+  'tiny_font_viewer_app.c',
+  'tiny_font_viewer_app_window.c',
   'main.c',
 ]
 

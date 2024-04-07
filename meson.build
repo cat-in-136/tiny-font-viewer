@@ -1,4 +1,4 @@
-project('fontviewer', 'c',
+project('tinyfontviewer', 'c',
         version: '0.0.0',
         license: 'GPLv2',
         meson_version: '>= 1.3'
@@ -27,7 +27,7 @@ gtk_dep = dependency('gtk4', version: gtk_req_version)
 #harfbuzz_dep = dependency('harfbuzz', version: harfbuzz_req_version)
 #freetype2_dep = dependency('freetype2')
 
-application_id = 'io.github.cat-in-136.font-viewer@0@'
+application_id = 'io.github.cat-in-136.font-viewer'
 
 config_h = configuration_data()
 config_h.set_quoted('VERSION', meson.project_version())
