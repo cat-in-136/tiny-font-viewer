@@ -1,4 +1,4 @@
-#include "tiny_font_viewer_app.h"
+#include "tiny-font-viewer-app.h"
 #include <gtk/gtk.h>
 
 int
