@@ -1,4 +1,5 @@
 sources = [
+  'open-type-layout.h',
   'sushi-font-loader.h',
   'sushi-font-loader.c',
   'sushi-font-widget.h',
