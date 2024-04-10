@@ -37,7 +37,7 @@ tiny_font_viewer_app_startup (GApplication *app)
 static TinyFontViewerAppWindow *
 ensure_window (GApplication *app)
 {
-  g_autoptr (GList) windows = NULL;
+  GList *windows = NULL;
   TinyFontViewerAppWindow *win = NULL;
 
   // get the window with ensuring exsitance
