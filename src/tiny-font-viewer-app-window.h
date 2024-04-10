@@ -9,6 +9,8 @@ G_DECLARE_FINAL_TYPE (TinyFontViewerAppWindow, tiny_font_viewer_app_window, TINY
 
 TinyFontViewerAppWindow *
 tiny_font_viewer_app_window_new (TinyFontViewerApp *app);
+
+gboolean tiny_font_viewer_app_window_is_file_opened (TinyFontViewerAppWindow *win);
 void tiny_font_viewer_app_window_show_preview (TinyFontViewerAppWindow *win,
                                                GFile *file,
                                                int face_index);

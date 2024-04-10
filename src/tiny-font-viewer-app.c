@@ -35,18 +35,23 @@ tiny_font_viewer_app_startup (GApplication *app)
 }
 
 static TinyFontViewerAppWindow *
-ensure_window (GApplication *app)
+create_blank_window (GApplication *app)
 {
-  GList *windows = NULL;
+  const GList *windows = NULL;
   TinyFontViewerAppWindow *win = NULL;
 
-  // get the window with ensuring exsitance
+  // reuse the existing window if blank window exists
   windows = gtk_application_get_windows (GTK_APPLICATION (app));
-  if (windows)
+  for (const GList *l = windows; l != NULL; l = l->next)
     {
-      win = TINY_FONT_VIEWER_APP_WINDOW (windows->data);
+      if (!tiny_font_viewer_app_window_is_file_opened (TINY_FONT_VIEWER_APP_WINDOW (l->data)))
+        {
+          win = TINY_FONT_VIEWER_APP_WINDOW (l->data);
+          break;
+        }
     }
-  else
+
+  if (!win)
     {
       win = tiny_font_viewer_app_window_new (TINY_FONT_VIEWER_APP (app));
     }
@@ -59,14 +64,17 @@ ensure_window (GApplication *app)
 static void
 tiny_font_viewer_app_activate (GApplication *app)
 {
-  ensure_window (app);
+  create_blank_window (app);
 }
 
 static void
 tiny_font_viewer_app_open (GApplication *app, GFile **files, int n_files, const char *hint)
 {
-  TinyFontViewerAppWindow *const win = ensure_window (app);
-  tiny_font_viewer_app_window_show_preview (win, files[0], 0);
+  for (int i = 0; i < n_files; i++)
+    {
+      TinyFontViewerAppWindow *const win = create_blank_window (app);
+      tiny_font_viewer_app_window_show_preview (win, files[i], 0); // TODO font index
+    }
 }
 
 static void

@@ -432,7 +432,6 @@ static void
 populate_details (TinyFontViewerAppWindow *win,
                   FT_Face face)
 {
-  GtkBox *const grid = GTK_BOX (win->grid_info);
   g_autofree gchar *glyph_count = NULL, *features = NULL;
   FT_MM_Var *ft_mm_var;
 
@@ -553,6 +552,12 @@ font_widget_error_cb (TinyFontViewerAppWindow *win,
                       SushiFontWidget *font_widget)
 {
   show_error (win, _ ("Could Not Display Font"), error->message);
+}
+
+gboolean
+tiny_font_viewer_app_window_is_file_opened (TinyFontViewerAppWindow *win)
+{
+  return (win->font_widget != NULL);
 }
 
 void
