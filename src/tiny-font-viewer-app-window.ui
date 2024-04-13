@@ -12,6 +12,17 @@
           <object class="GtkBox">
             <property name="orientation">horizontal</property>
             <child>
+              <object class="GtkSpinButton" id="face_index_spin">
+                <signal name="value-changed" handler="face_index_spin_value_changed_cb" object="TinyFontViewerAppWindow" swapped="no"/>
+                <property name="adjustment">
+                  <object class="GtkAdjustment" id="face_index_adjustment">
+                    <property name="step-increment">1</property>
+                  </object>
+                </property>
+                <property name="visible">False</property>
+              </object>
+            </child>
+            <child>
               <object class="GtkToggleButton" id="info_button">
                 <property name="label" translatable="yes">I_nfo</property>
                 <property name="use-underline">True</property>

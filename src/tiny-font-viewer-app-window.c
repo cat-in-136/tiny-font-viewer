@@ -27,6 +27,8 @@ struct _TinyFontViewerAppWindow
 {
   GtkApplicationWindow parent;
 
+  GtkSpinButton *face_index_spin;
+  GtkAdjustment *face_index_adjustment;
   GtkToggleButton *info_button;
   GtkScrolledWindow *swin_preview;
   GtkViewport *viewport_preview;
@@ -38,6 +40,18 @@ struct _TinyFontViewerAppWindow
 };
 
 G_DEFINE_TYPE (TinyFontViewerAppWindow, tiny_font_viewer_app_window, GTK_TYPE_APPLICATION_WINDOW);
+
+static void
+face_index_spin_value_changed_cb (GtkSpinButton *button, gpointer user_data)
+{
+  TinyFontViewerAppWindow *const win = TINY_FONT_VIEWER_APP_WINDOW (user_data);
+  const int face_index = gtk_spin_button_get_value (win->face_index_spin);
+
+  g_object_set (win->font_widget,
+                "face-index", face_index,
+                NULL);
+  sushi_font_widget_load (SUSHI_FONT_WIDGET (win->font_widget));
+}
 
 static char *
 preview_visible_child_closure (TinyFontViewerAppWindow *win,
@@ -491,12 +505,15 @@ tiny_font_viewer_app_window_class_init (TinyFontViewerAppWindowClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/cat-in-136/tiny-font-viewer/tiny-font-viewer-app-window.ui");
 
+  gtk_widget_class_bind_template_child (widget_class, TinyFontViewerAppWindow, face_index_spin);
+  gtk_widget_class_bind_template_child (widget_class, TinyFontViewerAppWindow, face_index_adjustment);
   gtk_widget_class_bind_template_child (widget_class, TinyFontViewerAppWindow, info_button);
   gtk_widget_class_bind_template_child (widget_class, TinyFontViewerAppWindow, swin_preview);
   gtk_widget_class_bind_template_child (widget_class, TinyFontViewerAppWindow, viewport_preview);
   gtk_widget_class_bind_template_child (widget_class, TinyFontViewerAppWindow, swin_info);
   gtk_widget_class_bind_template_child (widget_class, TinyFontViewerAppWindow, grid_info);
 
+  gtk_widget_class_bind_template_callback (widget_class, face_index_spin_value_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, preview_visible_child_closure);
 }
 
@@ -542,8 +559,32 @@ font_widget_loaded_cb (TinyFontViewerAppWindow *win,
       gtk_window_set_title (GTK_WINDOW (win), basename);
     }
 
+  // Show face_index spin button in case of font collection
+  if (face->num_faces > 1)
+    {
+      gtk_adjustment_configure (win->face_index_adjustment,
+                                face->face_index & 0xFFFF,
+                                0,
+                                face->num_faces,
+                                1,
+                                1,
+                                1);
+
+      gtk_widget_set_visible (GTK_WIDGET (win->face_index_spin), TRUE);
+    }
+  else
+    {
+      gtk_widget_set_visible (GTK_WIDGET (win->face_index_spin), FALSE);
+    }
+
+  // clear info grid
+  while (gtk_widget_get_last_child (GTK_WIDGET (win->grid_info)))
+    {
+      gtk_grid_remove (win->grid_info, gtk_widget_get_last_child (GTK_WIDGET (win->grid_info)));
+    }
+
   populate_grid (win, face);
-  // populate_details (win, face);
+  populate_details (win, face);
 }
 
 static void

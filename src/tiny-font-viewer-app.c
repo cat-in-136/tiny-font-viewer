@@ -73,7 +73,7 @@ tiny_font_viewer_app_open (GApplication *app, GFile **files, int n_files, const 
   for (int i = 0; i < n_files; i++)
     {
       TinyFontViewerAppWindow *const win = create_blank_window (app);
-      tiny_font_viewer_app_window_show_preview (win, files[i], 0); // TODO font index
+      tiny_font_viewer_app_window_show_preview (win, files[i], 0);
     }
 }
 
