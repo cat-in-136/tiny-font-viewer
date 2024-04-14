@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/io/github/cat-in-136/tiny-font-viewer">
-    <file compressed="true" preprocess="xml-stripblanks">tiny-font-viewer-app-window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">tiny-font-viewer-app-menu.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">tiny-font-viewer-app-window.ui</file>
     <file>style.css</file>
   </gresource>
 </gresources>

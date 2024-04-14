@@ -8,3 +8,5 @@
 G_DECLARE_FINAL_TYPE (TinyFontViewerApp, tiny_font_viewer_app, TINY_FONT_VIEWER, APP, GtkApplication)
 
 TinyFontViewerApp *tiny_font_viewer_app_new (void);
+
+void tiny_font_viewer_app_open_file (TinyFontViewerApp *app, GFile *file);

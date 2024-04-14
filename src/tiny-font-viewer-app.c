@@ -17,6 +17,54 @@ tiny_font_viewer_app_init (TinyFontViewerApp *app)
 }
 
 static void
+open_response_cb (GObject *source,
+                  GAsyncResult *result,
+                  gpointer user_data)
+{
+  GtkFileDialog *const dialog = GTK_FILE_DIALOG (source);
+  TinyFontViewerApp *const app = TINY_FONT_VIEWER_APP (user_data);
+  GListModel *const files = gtk_file_dialog_open_multiple_finish (dialog, result, NULL);
+  if (files)
+    {
+      const size_t n_files = g_list_model_get_n_items (files);
+      for (int i = 0; i < n_files; i++)
+        {
+          GFile *file = G_FILE (g_list_model_get_item (files, i));
+          tiny_font_viewer_app_open_file (app, file);
+        }
+    }
+}
+
+static void
+action_open (GSimpleAction *action, GVariant *parameter, gpointer app)
+{
+  g_autoptr (GtkFileDialog) dialog = NULL;
+  g_autoptr (GListStore) filters = NULL;
+  g_autoptr (GtkFileFilter) font_file_filter = NULL;
+
+  dialog = gtk_file_dialog_new ();
+  gtk_file_dialog_set_title (dialog, _ ("Open font files"));
+
+  filters = g_list_store_new (GTK_TYPE_FILE_FILTER);
+
+  font_file_filter = gtk_file_filter_new ();
+  gtk_file_filter_add_mime_type (font_file_filter, "font/*");
+  gtk_file_filter_set_name (font_file_filter, _ ("Fonts"));
+  g_list_store_append (filters, font_file_filter);
+
+  gtk_file_dialog_set_default_filter (dialog, font_file_filter);
+  gtk_file_dialog_set_filters (dialog, G_LIST_MODEL (filters));
+
+  gtk_file_dialog_open_multiple (dialog, NULL, NULL, open_response_cb, app);
+}
+
+static void
+action_quit (GSimpleAction *action, GVariant *parameter, gpointer app)
+{
+  g_application_quit (G_APPLICATION (app));
+}
+
+static void
 action_about (GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   const GList *windows = NULL;
@@ -45,15 +93,10 @@ action_about (GSimpleAction *action, GVariant *parameter, gpointer app)
                          NULL);
 }
 
-static void
-action_quit (GSimpleAction *action, GVariant *parameter, gpointer app)
-{
-  g_application_quit (G_APPLICATION (app));
-}
-
 static const GActionEntry app_entries[] = {
-  { "about", action_about, NULL, NULL, NULL },
-  { "quit", action_quit, NULL, NULL, NULL }
+  { "open", action_open, NULL, NULL, NULL },
+  { "quit", action_quit, NULL, NULL, NULL },
+  { "about", action_about, NULL, NULL, NULL }
 };
 
 static void
@@ -108,8 +151,7 @@ tiny_font_viewer_app_open (GApplication *app, GFile **files, int n_files, const 
 {
   for (int i = 0; i < n_files; i++)
     {
-      TinyFontViewerAppWindow *const win = create_blank_window (app);
-      tiny_font_viewer_app_window_show_preview (win, files[i], 0);
+      tiny_font_viewer_app_open_file (TINY_FONT_VIEWER_APP (app), files[i]);
     }
 }
 
@@ -128,4 +170,11 @@ tiny_font_viewer_app_new (void)
                        "application-id", APPLICATION_ID,    //
                        "flags", G_APPLICATION_HANDLES_OPEN, //
                        NULL);
+}
+
+void
+tiny_font_viewer_app_open_file (TinyFontViewerApp *app, GFile *file)
+{
+  TinyFontViewerAppWindow *const win = create_blank_window (G_APPLICATION (app));
+  tiny_font_viewer_app_window_show_preview (win, file, 0);
 }
