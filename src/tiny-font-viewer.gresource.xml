@@ -5,4 +5,7 @@
     <file compressed="true" preprocess="xml-stripblanks">tiny-font-viewer-app-window.ui</file>
     <file>style.css</file>
   </gresource>
+  <gresource prefix="/io/github/cat-in-136/tiny-font-viewer/gtk">
+    <file compressed="true" preprocess="xml-stripblanks">help-overlay.ui</file>
+  </gresource>
 </gresources>

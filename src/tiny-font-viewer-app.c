@@ -67,20 +67,14 @@ action_quit (GSimpleAction *action, GVariant *parameter, gpointer app)
 static void
 action_about (GSimpleAction *action, GVariant *parameter, gpointer app)
 {
-  const GList *windows = NULL;
-  TinyFontViewerAppWindow *win = NULL;
-
-  // find window
-  windows = gtk_application_get_windows (GTK_APPLICATION (app));
-  g_return_if_fail (windows != NULL);
-  win = TINY_FONT_VIEWER_APP_WINDOW (windows->data);
+  GtkWindow *const win = gtk_application_get_active_window (GTK_APPLICATION (app));
 
   static const char *authors[] = {
     "@cat_in_136",
     NULL
   };
 
-  gtk_show_about_dialog (GTK_WINDOW (win),
+  gtk_show_about_dialog (win,
                          "version", VERSION,
                          "authors", authors,
                          "program-name", _ ("Font Viewer"),
@@ -99,6 +93,16 @@ static const GActionEntry app_entries[] = {
   { "about", action_about, NULL, NULL, NULL }
 };
 
+static const struct
+{
+  const char *action;
+  const char *accels[2];
+} app_accelsp[] = {
+  { "app.open", { "<Ctrl>O", NULL } },
+  { "app.quit", { "<Ctrl>Q", NULL } },
+  { "win.show-help-overlay", { "<Ctrl>question", NULL } }
+};
+
 static void
 tiny_font_viewer_app_startup (GApplication *app)
 {
@@ -111,6 +115,12 @@ tiny_font_viewer_app_startup (GApplication *app)
                                    G_N_ELEMENTS (app_entries), app);
   gtk_application_set_menubar (GTK_APPLICATION (app),
                                G_MENU_MODEL (gtk_builder_get_object (builder, "menubar")));
+  for (int i = 0; i < G_N_ELEMENTS (app_accelsp); i++)
+    {
+      gtk_application_set_accels_for_action (GTK_APPLICATION (app),
+                                             app_accelsp[i].action,
+                                             app_accelsp[i].accels);
+    }
 }
 
 static TinyFontViewerAppWindow *

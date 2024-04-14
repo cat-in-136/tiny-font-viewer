@@ -36,6 +36,8 @@ struct _TinyFontViewerAppWindow
   GtkGrid *grid_info;
   SushiFontWidget *font_widget;
 
+  GtkShortcutController *shortcut_controller;
+
   GFile *font_file;
 };
 

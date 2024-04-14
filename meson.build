@@ -31,7 +31,7 @@ harfbuzz_dep = dependency('harfbuzz', version: harfbuzz_req_version)
 freetype2_dep = dependency('freetype2')
 fribidi_dep = dependency('fribidi')
 
-application_id = 'io.github.cat-in-136.font-viewer'
+application_id = 'io.github.cat-in-136.tiny-font-viewer'
 
 config_h = configuration_data()
 config_h.set_quoted('VERSION', meson.project_version())
