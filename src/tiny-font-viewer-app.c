@@ -1,6 +1,8 @@
 #include "tiny-font-viewer-app.h"
 #include "config.h"
+#include "pango/pango-font.h"
 #include "tiny-font-viewer-app-window.h"
+#include <fontconfig/fontconfig.h>
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
@@ -30,7 +32,7 @@ open_response_cb (GObject *source,
       for (int i = 0; i < n_files; i++)
         {
           GFile *file = G_FILE (g_list_model_get_item (files, i));
-          tiny_font_viewer_app_open_file (app, file);
+          tiny_font_viewer_app_open_file (app, file, 0);
         }
     }
 }
@@ -56,6 +58,98 @@ action_open (GSimpleAction *action, GVariant *parameter, gpointer app)
   gtk_file_dialog_set_filters (dialog, G_LIST_MODEL (filters));
 
   gtk_file_dialog_open_multiple (dialog, NULL, NULL, open_response_cb, app);
+}
+
+static void
+open_system_font_response_cb (GObject *source,
+                              GAsyncResult *result,
+                              gpointer user_data)
+{
+  GtkFontDialog *const dialog = GTK_FONT_DIALOG (source);
+  TinyFontViewerApp *const app = TINY_FONT_VIEWER_APP (user_data);
+  g_autoptr (GFile) file = NULL;
+  int face_index = 0;
+
+  PangoFontFace *const face = gtk_font_dialog_choose_face_finish (dialog, result, NULL);
+  if (face)
+    {
+      FcObjectSet *os = FcObjectSetBuild (FC_FILE, FC_INDEX, NULL);
+      FcFontSet *fontset = NULL;
+
+      // find a font matching its family and style.
+      {
+        FcPattern *pat = FcPatternCreate ();
+
+        PangoFontFamily *family = pango_font_face_get_family (face);
+        const char *const familyname = pango_font_family_get_name (family);
+
+        FcPatternAddString (pat, FC_FAMILY, (const FcChar8 *) familyname);
+        fontset = FcFontList (NULL, pat, os);
+
+        if (fontset->nfont > 1)
+          {
+            const char *const facename = pango_font_face_get_face_name (face);
+            FcFontSetDestroy (fontset);
+            FcPatternAddString (pat, FC_STYLE, (const FcChar8 *) facename);
+            fontset = FcFontList (NULL, pat, os);
+          }
+        else
+          {
+            // If only one font matches with the family, it can assume legacy font having no style.
+          }
+        FcPatternDestroy (pat);
+      }
+
+      // find a font matching fullname if still not found.
+      if (fontset->nfont == 0)
+        {
+          g_autoptr (PangoFontDescription) desc = pango_font_face_describe (face);
+          g_autofree char *fullname = pango_font_description_to_string (desc);
+
+          FcFontSetDestroy (fontset);
+
+          FcPattern *pat = FcPatternCreate ();
+          fontset = FcFontList (NULL, pat, os);
+          FcPatternAddString (pat, FC_FULLNAME, (const FcChar8 *) fullname);
+          FcPatternDestroy (pat);
+        }
+
+      if (fontset->nfont > 0)
+        {
+          const FcPattern *const matched = fontset->fonts[0];
+          FcChar8 *path = NULL;
+
+          FcPatternGetString (matched, FC_FILE, 0, &path);
+          FcPatternGetInteger (matched, FC_INDEX, 0, &face_index);
+
+          file = g_file_new_for_path ((const char *) path);
+        }
+      else
+        {
+          g_autoptr (PangoFontDescription) desc = pango_font_face_describe (face);
+          g_autofree char *fullname = pango_font_description_to_string (desc);
+          g_warning ("Font not found for %s", fullname);
+        }
+      FcFontSetDestroy (fontset);
+
+      FcObjectSetDestroy (os);
+    }
+
+  if (file)
+    {
+      tiny_font_viewer_app_open_file (app, file, face_index);
+    }
+}
+
+static void
+action_open_system_font (GSimpleAction *action, GVariant *parameter, gpointer app)
+{
+  g_autoptr (GtkFontDialog) dialog = NULL;
+
+  dialog = gtk_font_dialog_new ();
+  gtk_font_dialog_set_title (dialog, _ ("Open system font"));
+
+  gtk_font_dialog_choose_face (dialog, NULL, NULL, NULL, open_system_font_response_cb, app);
 }
 
 static void
@@ -89,6 +183,7 @@ action_about (GSimpleAction *action, GVariant *parameter, gpointer app)
 
 static const GActionEntry app_entries[] = {
   { "open", action_open, NULL, NULL, NULL },
+  { "open-system-font", action_open_system_font, NULL, NULL, NULL },
   { "quit", action_quit, NULL, NULL, NULL },
   { "about", action_about, NULL, NULL, NULL }
 };
@@ -112,6 +207,11 @@ tiny_font_viewer_app_startup (GApplication *app)
       "/io/github/cat-in-136/tiny-font-viewer/tiny-font-viewer-app-menu.ui");
 
   G_APPLICATION_CLASS (tiny_font_viewer_app_parent_class)->startup (app);
+
+  if (!FcInit ())
+    {
+      g_critical ("Can't initialize fontconfig library");
+    }
 
   g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries,
                                    G_N_ELEMENTS (app_entries), app);
@@ -163,7 +263,7 @@ tiny_font_viewer_app_open (GApplication *app, GFile **files, int n_files, const 
 {
   for (int i = 0; i < n_files; i++)
     {
-      tiny_font_viewer_app_open_file (TINY_FONT_VIEWER_APP (app), files[i]);
+      tiny_font_viewer_app_open_file (TINY_FONT_VIEWER_APP (app), files[i], 0);
     }
 }
 
@@ -185,8 +285,8 @@ tiny_font_viewer_app_new (void)
 }
 
 void
-tiny_font_viewer_app_open_file (TinyFontViewerApp *app, GFile *file)
+tiny_font_viewer_app_open_file (TinyFontViewerApp *app, GFile *file, int face_index)
 {
   TinyFontViewerAppWindow *const win = create_blank_window (G_APPLICATION (app));
-  tiny_font_viewer_app_window_show_preview (win, file, 0);
+  tiny_font_viewer_app_window_show_preview (win, file, face_index);
 }

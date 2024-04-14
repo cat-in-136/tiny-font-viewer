@@ -8,6 +8,10 @@
           <attribute name="label" translatable="yes">_Open</attribute>
           <attribute name="action">app.open</attribute>
         </item>
+        <item>
+          <attribute name="label" translatable="yes">Open System Font...</attribute>
+          <attribute name="action">app.open-system-font</attribute>
+        </item>
       </section>
       <section>
         <item>

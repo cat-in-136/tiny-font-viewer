@@ -28,6 +28,7 @@ harfbuzz_req_version = '>= 8.2.0'
 glib_dep = dependency('glib-2.0', version: glib_req_version)
 gtk_dep = dependency('gtk4', version: gtk_req_version)
 harfbuzz_dep = dependency('harfbuzz', version: harfbuzz_req_version)
+fontconfig_dep = dependency('fontconfig')
 freetype2_dep = dependency('freetype2')
 fribidi_dep = dependency('fribidi')
 
