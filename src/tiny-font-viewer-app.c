@@ -1,6 +1,7 @@
 #include "tiny-font-viewer-app.h"
 #include "config.h"
 #include "tiny-font-viewer-app-window.h"
+#include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
 struct _TinyFontViewerApp
@@ -16,22 +17,57 @@ tiny_font_viewer_app_init (TinyFontViewerApp *app)
 }
 
 static void
-quit_activated (GSimpleAction *action, GVariant *parameter, gpointer app)
+action_about (GSimpleAction *action, GVariant *parameter, gpointer app)
+{
+  const GList *windows = NULL;
+  TinyFontViewerAppWindow *win = NULL;
+
+  // find window
+  windows = gtk_application_get_windows (GTK_APPLICATION (app));
+  g_return_if_fail (windows != NULL);
+  win = TINY_FONT_VIEWER_APP_WINDOW (windows->data);
+
+  static const char *authors[] = {
+    "@cat_in_136",
+    NULL
+  };
+
+  gtk_show_about_dialog (GTK_WINDOW (win),
+                         "version", VERSION,
+                         "authors", authors,
+                         "program-name", _ ("Font Viewer"),
+                         "comments", _ ("View font files"),
+                         "logo-icon-name", TINY_FONT_VIEWER_ICON_NAME,
+                         //"translator-credits", _ ("translator-credits"),
+                         "license-type", GTK_LICENSE_GPL_2_0,
+                         "wrap-license", TRUE,
+                         "website", "https://github.com/cat-in-136/tiny-font-viewer",
+                         NULL);
+}
+
+static void
+action_quit (GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   g_application_quit (G_APPLICATION (app));
 }
 
 static const GActionEntry app_entries[] = {
-  { "quit", quit_activated, NULL, NULL, NULL }
+  { "about", action_about, NULL, NULL, NULL },
+  { "quit", action_quit, NULL, NULL, NULL }
 };
 
 static void
 tiny_font_viewer_app_startup (GApplication *app)
 {
+  g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
+      "/io/github/cat-in-136/tiny-font-viewer/tiny-font-viewer-app-menu.ui");
+
   G_APPLICATION_CLASS (tiny_font_viewer_app_parent_class)->startup (app);
 
   g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries,
                                    G_N_ELEMENTS (app_entries), app);
+  gtk_application_set_menubar (GTK_APPLICATION (app),
+                               G_MENU_MODEL (gtk_builder_get_object (builder, "menubar")));
 }
 
 static TinyFontViewerAppWindow *
@@ -88,9 +124,8 @@ tiny_font_viewer_app_class_init (TinyFontViewerAppClass *klass)
 TinyFontViewerApp *
 tiny_font_viewer_app_new (void)
 {
-  return g_object_new (TINY_FONT_VIEWER_APP_TYPE,                                      //
-                       "application-id", APPLICATION_ID,                               //
-                       "flags", G_APPLICATION_HANDLES_OPEN,                            //
-                       "resource-base-path", "/io/github/cat-in-136/tiny-font-viewer", //
+  return g_object_new (TINY_FONT_VIEWER_APP_TYPE,           //
+                       "application-id", APPLICATION_ID,    //
+                       "flags", G_APPLICATION_HANDLES_OPEN, //
                        NULL);
 }

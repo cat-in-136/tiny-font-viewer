@@ -520,7 +520,10 @@ tiny_font_viewer_app_window_class_init (TinyFontViewerAppWindowClass *klass)
 TinyFontViewerAppWindow *
 tiny_font_viewer_app_window_new (TinyFontViewerApp *app)
 {
-  return g_object_new (TINY_FONT_VIEWER_APP_WINDOW_TYPE, "application", app,
+  return g_object_new (TINY_FONT_VIEWER_APP_WINDOW_TYPE,        //
+                       "application", app,                      //
+                       "show-menubar", TRUE,                    //
+                       "icon-name", TINY_FONT_VIEWER_ICON_NAME, //
                        NULL);
 }
 
@@ -540,6 +543,7 @@ font_widget_loaded_cb (TinyFontViewerAppWindow *win,
 {
   FT_Face face = sushi_font_widget_get_ft_face (font_widget);
   const gchar *uri;
+  g_autofree gchar *title = NULL;
 
   if (face == NULL)
     {
@@ -551,13 +555,14 @@ font_widget_loaded_cb (TinyFontViewerAppWindow *win,
 
   if (face->family_name)
     {
-      gtk_window_set_title (GTK_WINDOW (win), face->family_name);
+      title = g_strdup_printf ("%s — %s", face->family_name, _ ("Font Viewer"));
     }
   else
     {
       g_autofree gchar *basename = g_file_get_basename (win->font_file);
-      gtk_window_set_title (GTK_WINDOW (win), basename);
+      title = g_strdup_printf ("%s — %s", basename, _ ("Font Viewer"));
     }
+  gtk_window_set_title (GTK_WINDOW (win), title);
 
   // Show face_index spin button in case of font collection
   if (face->num_faces > 1)
