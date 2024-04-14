@@ -100,6 +100,8 @@ static const struct
 } app_accelsp[] = {
   { "app.open", { "<Ctrl>O", NULL } },
   { "app.quit", { "<Ctrl>Q", NULL } },
+  { "win.go-next-face-index", { "<Alt>Right", NULL } },
+  { "win.go-prev-face-index", { "<Alt>Left", NULL } },
   { "win.show-help-overlay", { "<Ctrl>question", NULL } }
 };
 

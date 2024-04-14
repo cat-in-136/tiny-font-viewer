@@ -481,9 +481,31 @@ populate_details (TinyFontViewerAppWindow *win,
 }
 
 static void
+action_go_next_face_index (GSimpleAction *action, GVariant *parameter, gpointer win)
+{
+  gtk_spin_button_spin (TINY_FONT_VIEWER_APP_WINDOW (win)->face_index_spin,
+                        GTK_SPIN_STEP_FORWARD, 1);
+}
+
+static void
+action_go_prev_face_index (GSimpleAction *action, GVariant *parameter, gpointer win)
+{
+  gtk_spin_button_spin (TINY_FONT_VIEWER_APP_WINDOW (win)->face_index_spin,
+                        GTK_SPIN_STEP_BACKWARD, 1);
+}
+
+static const GActionEntry win_entries[] = {
+  { "go-next-face-index", action_go_next_face_index, NULL, NULL, NULL },
+  { "go-prev-face-index", action_go_prev_face_index, NULL, NULL, NULL },
+};
+
+static void
 tiny_font_viewer_app_window_init (TinyFontViewerAppWindow *win)
 {
   gtk_widget_init_template (GTK_WIDGET (win));
+
+  g_action_map_add_action_entries (G_ACTION_MAP (win), win_entries,
+                                   G_N_ELEMENTS (win_entries), win);
 }
 
 static void

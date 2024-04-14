@@ -7,6 +7,29 @@
       <object class="GtkShortcutsSection">
         <child>
           <object class="GtkShortcutsGroup">
+            <property name="title">Font</property>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">&lt;Alt&gt;n</property>
+                <property name="title" translatable="yes">Toggle info view</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">&lt;Alt&gt;Right</property>
+                <property name="title" translatable="yes">Go next face index</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">&lt;Alt&gt;Left</property>
+                <property name="title" translatable="yes">Go previous face index</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcutsGroup">
             <property name="title">General</property>
             <child>
               <object class="GtkShortcutsShortcut">
