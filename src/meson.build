@@ -16,7 +16,7 @@ resources = gnome.compile_resources('tiny-font-viewer-resources',
   source_dir: '.',
   c_name: 'tiny_font_viewer')
 
-executable('fontviewer', sources + resources,
+executable('tiny-font-viewer', sources + resources,
   include_directories: [ root_inc, include_directories('.') ],
   dependencies : [
     glib_dep,
