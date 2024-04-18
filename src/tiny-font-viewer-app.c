@@ -19,6 +19,13 @@ tiny_font_viewer_app_init (TinyFontViewerApp *app)
 }
 
 static void
+action_toggle (GSimpleAction *action, GVariant *parameter, gpointer app)
+{
+  g_autoptr (GVariant) state = g_action_get_state (G_ACTION (action));
+  g_action_change_state (G_ACTION (action), g_variant_new_boolean (!g_variant_get_boolean (state)));
+}
+
+static void
 open_response_cb (GObject *source,
                   GAsyncResult *result,
                   gpointer user_data)
@@ -159,6 +166,19 @@ action_quit (GSimpleAction *action, GVariant *parameter, gpointer app)
 }
 
 static void
+dark_changed (GSimpleAction *action, GVariant *parameter, gpointer app)
+{
+  GtkSettings *settings = gtk_settings_get_default ();
+
+  g_object_set (G_OBJECT (settings),
+                "gtk-application-prefer-dark-theme",
+                g_variant_get_boolean (parameter),
+                NULL);
+
+  g_simple_action_set_state (action, parameter);
+}
+
+static void
 action_about (GSimpleAction *action, GVariant *parameter, gpointer app)
 {
   GtkWindow *const win = gtk_application_get_active_window (GTK_APPLICATION (app));
@@ -185,6 +205,7 @@ static const GActionEntry app_entries[] = {
   { "open", action_open, NULL, NULL, NULL },
   { "open-system-font", action_open_system_font, NULL, NULL, NULL },
   { "quit", action_quit, NULL, NULL, NULL },
+  { "dark", action_toggle, NULL, "false", dark_changed },
   { "about", action_about, NULL, NULL, NULL }
 };
 
@@ -195,6 +216,7 @@ static const struct
 } app_accelsp[] = {
   { "app.open", { "<Ctrl>O", NULL } },
   { "app.quit", { "<Ctrl>Q", NULL } },
+  { "app.dark", { "<Ctrl>D", NULL } },
   { "win.go-next-face-index", { "<Alt>Right", NULL } },
   { "win.go-prev-face-index", { "<Alt>Left", NULL } },
   { "win.show-help-overlay", { "<Ctrl>question", NULL } }

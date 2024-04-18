@@ -30,6 +30,17 @@
         </child>
         <child>
           <object class="GtkShortcutsGroup">
+            <property name="title">View</property>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="accelerator">&lt;Ctrl&gt;d</property>
+                <property name="title" translatable="yes">Toggle dark theme</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcutsGroup">
             <property name="title">General</property>
             <child>
               <object class="GtkShortcutsShortcut">
