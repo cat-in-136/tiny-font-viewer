@@ -18,8 +18,7 @@ localedir = join_paths(prefix, get_option('localedir'))
 
 pkgdatadir = join_paths(datadir, meson.project_name())
 
-#desktopdir = join_paths(datadir, 'applications')
-#servicesdir = join_paths(datadir, 'dbus-1', 'services')
+desktopdir = join_paths(datadir, 'applications')
 
 glib_req_version = '>= 2.78.0'
 gtk_req_version = '>= 4.12.0'
@@ -43,3 +42,6 @@ configure_file(output: 'config.h', configuration: config_h)
 root_inc = include_directories('.')
 
 subdir('src')
+subdir('data')
+
+meson.add_install_script('meson-postinstall.sh')
