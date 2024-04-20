@@ -1,0 +1,44 @@
+Name: tiny-font-viewer
+Version: @VERSION@
+Release: 0%{?dist}
+Summary: View font files
+License: GPLv2
+URL: https://github.com/cat-in-136/tiny-font-viewer
+Source0: tiny-font-viewer-%{version}.tar.xz
+BuildRequires: gtk4-devel, fontconfig-devel
+BuildRequires: meson, gcc
+
+%description
+View font files
+
+%prep
+%autosetup
+
+%build
+%meson
+%meson_build
+
+%install
+%meson_install
+
+%check
+%meson_test
+
+%post
+update-desktop-database &> /dev/null || :
+
+%postun
+update-desktop-database &> /dev/null || :
+
+%files
+%defattr(-,root,root,-)
+%doc COPYING
+%{_bindir}/*
+##%%{_datadir}/locale/*/LC_MESSAGES/%%{name}.mo
+%{_datadir}/applications/*.desktop
+%{_datadir}/metainfo/*.appdata.xml
+
+%changelog
+* Fri Apr 19 2024 cat_in_136 - 0.0-0
+- Initial RPM packaging.
+

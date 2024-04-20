@@ -41,7 +41,8 @@ configure_file(output: 'config.h', configuration: config_h)
 
 root_inc = include_directories('.')
 
-subdir('src')
+subdir('contrib')
 subdir('data')
+subdir('src')
 
 meson.add_install_script('meson-postinstall.sh')
